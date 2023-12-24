@@ -1,17 +1,14 @@
 package com.ohussar.customnpcs;
 
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
-import org.openjdk.nashorn.internal.scripts.JS;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;

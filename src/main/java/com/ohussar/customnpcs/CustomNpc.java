@@ -1,5 +1,7 @@
 package com.ohussar.customnpcs;
 
+import java.util.UUID;
+
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.SyncQuestData;
 import com.ohussar.customnpcs.Quests.Quest;
@@ -28,6 +30,9 @@ public class CustomNpc extends AgeableMob implements MenuProvider {
     private int questAmount = 3;
     public Quest[] quests = new Quest[questAmount];
     public int frame = 0;
+
+
+    public UUID myUUID;
 
     ContainerData data;
 

@@ -17,6 +17,7 @@ public class CustomNpcMenu extends AbstractContainerMenu{
     public CustomNpc npc;
 
     public ContainerData data;
+    public Player player;
 
     public CustomNpcMenu(int id, Inventory inv, FriendlyByteBuf buf){
         this(id, inv, inv.player.level().getEntity(buf.readInt()), new SimpleContainerData(3));
@@ -31,6 +32,7 @@ public class CustomNpcMenu extends AbstractContainerMenu{
         }
         this.data = data;
         addDataSlots(data);
+        this.player = playerInv.player;
     }
 
     public Quest getQuest(int i){
@@ -46,14 +48,14 @@ public class CustomNpcMenu extends AbstractContainerMenu{
     public void createPlayerInventory(Inventory inv){
         for(int ii = 0; ii < 3; ii ++ ){
             for(int jj = 0; jj < 9; jj++){
-                addSlot(new Slot(inv, 9 + jj + ii * 9, 8 + jj * 18, 84 + ii * 18));
+                addSlot(new Slot(inv, 9 + jj + ii * 9, 8 + jj * 18, 89 + ii * 18));
             }
         }
     }
     
     public void createPlayerHotbar(Inventory inv){
         for(int ii = 0; ii < 9; ii ++ ){
-            addSlot(new Slot(inv, ii, 8 + ii * 18, 142));
+            addSlot(new Slot(inv, ii, 8 + ii * 18, 147));
         }
     }
 

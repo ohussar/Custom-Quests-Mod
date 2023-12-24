@@ -23,10 +23,20 @@ public class PacketHandler {
         .decoder(SyncQuestData::new)
         .consumerMainThread(SyncQuestData::handle)
         .add();
-         INSTANCE.messageBuilder(SyncQuests.class, id++)
+        INSTANCE.messageBuilder(SyncQuests.class, id++)
         .encoder(SyncQuests::encode)
         .decoder(SyncQuests::new)
         .consumerMainThread(SyncQuests::handle)
+        .add();
+        INSTANCE.messageBuilder(PlayerClaimTask.class, id++)
+        .encoder(PlayerClaimTask::encode)
+        .decoder(PlayerClaimTask::new)
+        .consumerMainThread(PlayerClaimTask::handle)
+        .add();
+        INSTANCE.messageBuilder(PlayerClaimTaskClient.class, id++)
+        .encoder(PlayerClaimTaskClient::encode)
+        .decoder(PlayerClaimTaskClient::new)
+        .consumerMainThread(PlayerClaimTaskClient::handle)
         .add();
     }
 

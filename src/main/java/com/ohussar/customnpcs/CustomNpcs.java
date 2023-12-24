@@ -2,16 +2,23 @@ package com.ohussar.customnpcs;
 
 import com.mojang.logging.LogUtils;
 import com.ohussar.customnpcs.Network.PacketHandler;
+import com.ohussar.customnpcs.Network.PlayerClaimTaskClient;
 import com.ohussar.customnpcs.Network.SyncQuests;
+import com.ohussar.customnpcs.PlayerClaimedTasks.PlayerClaimedTasksProvider;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -69,8 +76,50 @@ public class CustomNpcs
         if(Config.Json != ""){
             LOGGER.info("Sent info to client");
             PacketHandler.sendToPlayer(new SyncQuests(Config.Json), (ServerPlayer) event.getEntity());
+            CompoundTag c = new CompoundTag();
+            event.getEntity().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+                cap.saveNBTData(c);
+            });
+            PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), (ServerPlayer) event.getEntity());
         }
     }
+
+    @Mod.EventBusSubscriber(modid = MODID)
+    public class ModEvents{
+        @SubscribeEvent
+        public static void onAttachCapabilitiesPlayer(AttachCapabilitiesEvent<Entity> event){
+                if(event.getObject() instanceof Player){
+                    if(!event.getObject().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).isPresent()){
+                        event.addCapability(new ResourceLocation(MODID, "properties"), new PlayerClaimedTasksProvider());
+                    }
+                }
+        }
+        @SubscribeEvent
+        public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event){
+            event.getEntity().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+                CompoundTag c = new CompoundTag(); //// Capability syncing
+                cap.saveNBTData(c);
+                PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), (ServerPlayer) event.getEntity());
+            });
+        }
+        @SubscribeEvent
+        public static void onPlayerCloned(PlayerEvent.Clone event){
+            if(event.isWasDeath()){
+                event.getOriginal().reviveCaps();
+                event.getOriginal().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(oldStore -> {
+                    event.getEntity().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(newStore ->{
+                        newStore.copyFrom(oldStore.getQuests());
+                    });
+                });
+                event.getOriginal().invalidateCaps();
+            }
+        }
+        @SubscribeEvent
+        public void onDimensionChange (PlayerEvent.PlayerChangedDimensionEvent event){
+            event.getEntity().reviveCaps();
+        }
+    }
+
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents

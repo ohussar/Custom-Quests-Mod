@@ -9,7 +9,6 @@ import net.minecraftforge.network.NetworkEvent;
 
 public class SyncQuestsHandler { 
     public static void handlePacket(SyncQuests a, Supplier<NetworkEvent.Context> context){
-        CustomNpcs.LOGGER.info("------------------------------------------");
         CustomNpcs.LOGGER.info(a.json);
         Config.loadFromJson(a.json);
         context.get().enqueueWork(() -> {
