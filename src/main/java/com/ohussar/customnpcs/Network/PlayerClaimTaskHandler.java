@@ -13,12 +13,6 @@ public class PlayerClaimTaskHandler {
         context.get().enqueueWork(() -> {
             Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
                 cap.loadNBTData(a.nbt, true);
-                CustomNpcs.LOGGER.info("recebido");
-                if(a.nbt.contains("kill0")){
-                    if(a.nbt.getCompound("kill0").contains("kills0")){
-                        CustomNpcs.LOGGER.info(Integer.toString(a.nbt.getCompound("kill0").getInt("kills0")));
-                    }
-                }
             });
         });
     }

@@ -18,11 +18,6 @@ public class PacketHandler {
         .simpleChannel();
 
     public static void register(){
-        INSTANCE.messageBuilder(SyncQuestData.class, id++)
-        .encoder(SyncQuestData::encode)
-        .decoder(SyncQuestData::new)
-        .consumerMainThread(SyncQuestData::handle)
-        .add();
         INSTANCE.messageBuilder(SyncQuests.class, id++)
         .encoder(SyncQuests::encode)
         .decoder(SyncQuests::new)

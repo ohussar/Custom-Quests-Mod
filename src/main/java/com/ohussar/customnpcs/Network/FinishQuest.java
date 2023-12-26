@@ -27,6 +27,9 @@ public class FinishQuest {
             ServerPlayer player = context.get().getSender();
             player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
                 cap.removeQuest(q.uuid);
+                if(cap.getTimer() <= 0){
+                    cap.setDelay();
+                }
             });
         });
     }

@@ -70,12 +70,7 @@ public class QuestComplete {
                 newStacks.add(item);                         
             }
 
-            PacketHandler.sendToServer(new SyncInventory(newStacks, slotsChanged));
-            PacketHandler.sendToServer(new FinishQuest(uuid));
-            Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
-                cap.removeQuest(uuid);
-            });
-            Minecraft.getInstance().player.closeContainer();
+            Finish(slotsChanged, newStacks, uuid);
 
         }
     }
@@ -133,13 +128,20 @@ public class QuestComplete {
                 slotsChanged.add(free);
                 newStacks.add(item);                         
             }
-
-            PacketHandler.sendToServer(new SyncInventory(newStacks, slotsChanged));
-            PacketHandler.sendToServer(new FinishQuest(uuid));
-            Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
-                cap.removeQuest(uuid);
-            });
-            Minecraft.getInstance().player.closeContainer();
+            Finish(slotsChanged, newStacks, uuid);
         }
+
+
+    }
+    public static void Finish(List<Integer> slots, List<ItemStack> stacks, UUID uuid){
+        PacketHandler.sendToServer(new SyncInventory(stacks, slots));
+        PacketHandler.sendToServer(new FinishQuest(uuid));
+        Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+            cap.removeQuest(uuid);
+            if(cap.getTimer() <= 0){
+                cap.setDelay();
+            }
+        });
+        Minecraft.getInstance().player.closeContainer();
     }
 }

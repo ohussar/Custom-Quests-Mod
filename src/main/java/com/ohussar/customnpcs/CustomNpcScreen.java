@@ -76,6 +76,7 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
 
     private String mobDisplayName = "";
     private int iteration;
+    private int delay = 0;
 
     public CustomNpcScreen(CustomNpcMenu menu, Inventory inv, Component ptitle) {
         super(menu, inv, ptitle);
@@ -97,6 +98,7 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
             quest = menu.getQuest(questSelected);
             Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
                 int size = cap.getQuests().size();
+                delay = cap.getTimer();
                 for(int k = 0; k < size; k++){
                     if(cap.getQuests().get(k).npc.equals(menu.npc.getUUID())){
                         canDraw = false;
@@ -104,10 +106,41 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
                     }
                 }
             });
-            drawQuestItems(test, quest, mouseX, mouseY,!canDraw);
-            drawGetQuestButton(test, mouseX, mouseY, canDraw);
-            drawChangeMissionButtons(test, quest, mouseX, mouseY, canDraw);
+            
+
+            if(delay > 0 && canDraw){
+                drawQuestTimer(test, delay);
+                if(left != null){
+                    left.active = false;
+                }
+                if(right != null){
+                    right.active = false;
+                }
+                if(questButton != null){
+                    questButton.active = false;
+                }
+            }else{
+                if(left != null){
+                    left.active = true;
+                }
+                if(right != null){
+                    right.active = true;
+                }
+                if(questButton != null){
+                    questButton.active = true;
+                }
+                drawQuestItems(test, quest, mouseX, mouseY,!canDraw);
+                drawGetQuestButton(test, mouseX, mouseY, canDraw);
+                drawChangeMissionButtons(test, quest, mouseX, mouseY, canDraw);
+            }
         }
+    }
+    public void drawQuestTimer(GuiGraphics render, int timer){
+        int xx = this.leftPos + buttonPosX;
+        int yy = this.topPos + buttonPosY;
+        String t = "Aguarde " + Integer.toString(timer/(20)) + " segundos";
+        render.drawCenteredString(font, Component.literal(t), xx + buttonW / 2, 
+            yy + 3, 0xffffff);
     }
 
     public void drawChangeMissionButtons(GuiGraphics render, Quest quest, int mouseX, int mouseY, Boolean can){

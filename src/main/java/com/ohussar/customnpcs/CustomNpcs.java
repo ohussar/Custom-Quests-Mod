@@ -1,6 +1,7 @@
 package com.ohussar.customnpcs;
 
 import com.mojang.logging.LogUtils;
+import com.ohussar.customnpcs.CustomNpcs.ServerModEvents;
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.PlayerClaimTaskClient;
 import com.ohussar.customnpcs.Network.SyncQuests;
@@ -20,11 +21,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.ticks.TickPriority;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -32,11 +36,13 @@ import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
+import oshi.hardware.CentralProcessor.TickType;
 
 import java.util.List;
 
@@ -49,6 +55,7 @@ public class CustomNpcs
 {
     // Define mod id in a common place for everything to reference
     public static final String MODID = "customnpcs";
+    public static final int QUEST_DELAY = 6000;
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
     public CustomNpcs()
@@ -128,6 +135,11 @@ public class CustomNpcs
         cap.saveNBTData(c);
         PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), player);
     }
+    public static void sync(PlayerClaimedTasks cap, ServerPlayer player){
+        CompoundTag c = new CompoundTag(); //// Capability syncing
+        cap.saveNBTData(c);
+        PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), player);
+    }
 
     @Mod.EventBusSubscriber(modid = MODID)
     public class ModEvents{
@@ -163,6 +175,28 @@ public class CustomNpcs
         @SubscribeEvent
         public void onDimensionChange (PlayerEvent.PlayerChangedDimensionEvent event){
             event.getEntity().reviveCaps();
+        }
+        @SubscribeEvent
+        public static void playerTick(PlayerTickEvent event)
+        {
+            //CustomNpcs.LOGGER.info("aaa");
+            if(event.phase == TickEvent.Phase.START){
+                event.player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+                    //CustomNpcs.LOGGER.info("aaa");
+                    if(event.side == LogicalSide.SERVER){
+                        if(cap.getTimer() > 0){
+                            cap.subTimer();
+                            if(cap.getTimer()%5 == 0){
+                                sync(cap, (ServerPlayer) event.player);
+                            }
+                        }
+                    }else{
+                        if(cap.getTimer() > 0){
+                            cap.subTimer();
+                        }
+                    }
+                });
+            }
         }
     }
 

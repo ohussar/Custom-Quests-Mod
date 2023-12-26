@@ -15,29 +15,31 @@ import net.minecraft.world.item.ItemStack;
 
 public class CustomNpcMenu extends AbstractContainerMenu{
     public CustomNpc npc;
-
-    public ContainerData data;
     public Player player;
     public Inventory playerInv;
+
+    private Quest[] quests = new Quest[3];
+
     public CustomNpcMenu(int id, Inventory inv, FriendlyByteBuf buf){
-        this(id, inv, inv.player.level().getEntity(buf.readInt()), new SimpleContainerData(3));
+        this(id, inv, inv.player.level().getEntity(buf.readInt()));
     }
 
-    protected CustomNpcMenu(int id, Inventory playerInv, Entity npc, ContainerData data) {
+    protected CustomNpcMenu(int id, Inventory playerInv, Entity npc) {
         super(MenuInit.NPC_MENU.get(), id);
         createPlayerHotbar(playerInv);  
         createPlayerInventory(playerInv);
         if(npc instanceof CustomNpc n){
             this.npc = n;
         }
-        this.data = data;
-        addDataSlots(data);
         this.player = playerInv.player;
         this.playerInv = playerInv;
+        for(int i = 0; i < 3; i++){
+            quests[i] = Quests.getRandomQuest();
+        }
     }
 
     public Quest getQuest(int i){
-        return Quests.handle_quest_id(data.get(i));
+        return quests[i];
     }
 
 

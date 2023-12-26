@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.ohussar.customnpcs.CustomNpcs;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 @AutoRegisterCapability
 public class PlayerClaimedTasks {
     private List<ClaimedQuest> quest = new ArrayList<ClaimedQuest>();
-
+    private int questTimer = 0;
     public List<ClaimedQuest> getQuests(){
         return quest;
     }
@@ -28,12 +30,26 @@ public class PlayerClaimedTasks {
             }
         }
     }
+    public int getTimer(){
+        return questTimer;
+    }
+
+    public void setDelay(){
+        this.questTimer = CustomNpcs.QUEST_DELAY;
+    }
 
     public void copyFrom(List<ClaimedQuest> quest){
         this.quest = quest;
     }
+    public void subTimer(){
+        this.questTimer--;
+        if(this.questTimer < 0){
+            this.questTimer = 0;
+        }
+    }
 
     public void saveNBTData(CompoundTag nbt){
+        nbt.putInt("questTimer", questTimer);
         if(quest != null){
             int size = quest.size();
             nbt.putInt("quest_amount", size);
@@ -52,6 +68,9 @@ public class PlayerClaimedTasks {
     }
 
     public void loadNBTData(CompoundTag nbt, Boolean override){
+        if(nbt.contains("questTimer")){
+            questTimer = nbt.getInt("questTimer");
+        }
         if(override){
             quest.clear();
         }
