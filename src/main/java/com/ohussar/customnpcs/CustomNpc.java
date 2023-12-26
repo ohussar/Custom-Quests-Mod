@@ -48,8 +48,11 @@ public class CustomNpc extends AgeableMob implements MenuProvider {
             if(player instanceof ServerPlayer s){
                 if(!s.level().isClientSide){
                     NetworkHooks.openScreen(s, this, buf -> buf.writeInt(this.getId()));
+                    return InteractionResult.CONSUME;
                 }
             }
+        }else{
+            return InteractionResult.SUCCESS;
         }
         return super.mobInteract(player, p_21421_);
     }

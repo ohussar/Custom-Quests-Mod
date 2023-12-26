@@ -61,11 +61,13 @@ public class Quests {
             mobs[i] = q.kills.get(i).mob;
             kills[i] = q.kills.get(i).kill;
         }
+        
 
         quests.add(new Quest(q.type, 
             new QuestItem(rewardItem, rewardCount),
             new QuestItem(inputItem, inputCount), 
             new QuestKills(mobs, kills),
+            q.difficulty,
             q.id
             ));
 

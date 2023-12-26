@@ -208,8 +208,21 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
         int textxx = 32 + leftPos + 4;
         int textyy = 51 - 14 + topPos;
         int textxx1 = 143 + leftPos - 11;
+        
+        int color = 0xffffff;
+        switch(quest.difficulty){
+            case 1:
+                color = 0x32cd32;
+            break;
+            case 2:
+                color = 0xfff200;
+            break;
+            case 3:
+                color = 0xff0000;
+            break;
+        }
 
-        render.drawCenteredString(font, Component.literal("Requisitos:"), textxx, textyy, 0xffffff);
+        render.drawCenteredString(font, Component.literal("Requisitos:"), textxx, textyy, color);
         render.drawCenteredString(font, Component.literal("Recompensas:"), textxx1, textyy, 0xffffff);
         // requisitos
         // recompensas
