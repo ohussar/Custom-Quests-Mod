@@ -104,7 +104,7 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
                     }
                 }
             });
-            drawQuestItems(test, quest, !canDraw);
+            drawQuestItems(test, quest, mouseX, mouseY,!canDraw);
             drawGetQuestButton(test, mouseX, mouseY, canDraw);
             drawChangeMissionButtons(test, quest, mouseX, mouseY, canDraw);
         }
@@ -167,7 +167,7 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
     }
 
 
-    public void drawQuestItems(GuiGraphics render, Quest quest, Boolean claimed){
+    public void drawQuestItems(GuiGraphics render, Quest quest, int mouseX, int mouseY, Boolean claimed){
 
         QuestItem rewards = quest.rewardItems;
         QuestItem inputs = quest.inputItems;
@@ -189,8 +189,13 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
             if(rewards.quantity[i] < 10){
                 xxNumb += 3;
             }
+            if(inBound(mouseX, mouseY, this.leftPos + (int)rewardItemsPos[i].x, this.topPos + (int)rewardItemsPos[i].y, 16, 16)){
+                render.renderTooltip(font, item.getDisplayName(), mouseX, mouseY);
+            }
             render.pose().translate(0.0f, 0.0f, 200f);
             render.drawCenteredString(font, Component.literal(Integer.toString(rewards.quantity[i])), xxNumb, yyNumb, 0xffffff);
+            render.pose().translate(0.0f, 0.0f, -200f);
+
         }
         for(int i = 0; i < inputs.item.length; i++){
                         
@@ -202,9 +207,12 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
             if(inputs.quantity[i] < 10){
                 xxNumb += 3;
             }
-
+            if(inBound(mouseX, mouseY, this.leftPos + (int)inputItemsPos[i].x, this.topPos + (int)inputItemsPos[i].y, 16, 16)){
+                render.renderTooltip(font, item.getDisplayName(), mouseX, mouseY);
+            }
             render.pose().translate(0.0f, 0.0f, 200f);
             render.drawCenteredString(font, Component.literal(Integer.toString(inputs.quantity[i])), xxNumb, yyNumb, 0xffffff);
+            render.pose().translate(0.0f, 0.0f, -200f);
         }
 
 
@@ -241,7 +249,7 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
                 }   
 
 
-                render.drawString(font, Component.literal(mobDisplayName), leftPos + 10, textyy+10, 0xffffff);
+                render.drawString(font, Component.literal(mobDisplayName), leftPos + 10, textyy+10+10*i, 0xffffff);
 
             }
 

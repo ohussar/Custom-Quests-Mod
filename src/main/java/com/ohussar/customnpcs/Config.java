@@ -32,6 +32,7 @@ public class Config
     }
 
     public static void loadFromJson(String json){
+        Quests.quests.clear();
         Gson gson = new Gson();
         QuestRawJson.Data raw;
         JsonElement element = JsonParser.parseString(json);
