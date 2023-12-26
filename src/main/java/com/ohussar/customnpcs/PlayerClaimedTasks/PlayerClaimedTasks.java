@@ -15,8 +15,8 @@ public class PlayerClaimedTasks {
         return quest;
     }
 
-    public void addQuest(int id, UUID uuid){
-        quest.add(new ClaimedQuest(uuid, id));
+    public void addQuest(int id, UUID uuid, int[] kills){
+        quest.add(new ClaimedQuest(uuid, id, kills));
     }
 
     public void removeQuest(UUID uuid){
@@ -40,18 +40,36 @@ public class PlayerClaimedTasks {
             for(int i = 0; i < size; i++){
                 nbt.putInt("id"+Integer.toString(i), quest.get(i).id);
                 nbt.putUUID("uuid"+Integer.toString(i), quest.get(i).npc);
+
+                CompoundTag kill = new CompoundTag();
+                kill.putInt("size", quest.get(i).kills.length);
+                for(int k = 0; k < quest.get(i).kills.length; k++){
+                    kill.putInt("kills"+Integer.toString(k), quest.get(i).kills[k]);
+                }
+                nbt.put("kill"+Integer.toString(i), kill);
             }
         }
     }
 
-    public void loadNBTData(CompoundTag nbt){
+    public void loadNBTData(CompoundTag nbt, Boolean override){
+        if(override){
+            quest.clear();
+        }
         int size = nbt.getInt("quest_amount");
         for(int i = 0; i < size; i++){
             if(nbt.contains("uuid" + Integer.toString(i))){
+
+                CompoundTag kill = nbt.getCompound("kill"+Integer.toString(i));
+                int ss = kill.getInt("size");
+                int[] kills = new int[ss];
+                for(int k = 0; k < ss; k++){
+                    kills[k] = kill.getInt("kills"+Integer.toString(k));
+                }
                 quest.add(
                     new ClaimedQuest(
                         nbt.getUUID("uuid" + Integer.toString(i)), 
-                        nbt.getInt("id"+Integer.toString(i))
+                        nbt.getInt("id"+Integer.toString(i)),
+                        kills
                         )
                         );
             }

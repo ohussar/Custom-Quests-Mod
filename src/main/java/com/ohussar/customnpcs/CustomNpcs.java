@@ -4,7 +4,12 @@ import com.mojang.logging.LogUtils;
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.PlayerClaimTaskClient;
 import com.ohussar.customnpcs.Network.SyncQuests;
+import com.ohussar.customnpcs.PlayerClaimedTasks.ClaimedQuest;
+import com.ohussar.customnpcs.PlayerClaimedTasks.PlayerClaimedTasks;
 import com.ohussar.customnpcs.PlayerClaimedTasks.PlayerClaimedTasksProvider;
+import com.ohussar.customnpcs.Quests.Quest;
+import com.ohussar.customnpcs.Quests.QuestType;
+import com.ohussar.customnpcs.Quests.Quests;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -12,12 +17,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -27,6 +36,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.List;
 
 import org.slf4j.Logger;
 
@@ -76,12 +88,45 @@ public class CustomNpcs
         if(Config.Json != ""){
             LOGGER.info("Sent info to client");
             PacketHandler.sendToPlayer(new SyncQuests(Config.Json), (ServerPlayer) event.getEntity());
-            CompoundTag c = new CompoundTag();
             event.getEntity().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
-                cap.saveNBTData(c);
+                syncCapability(cap, (ServerPlayer) event.getEntity());
             });
-            PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), (ServerPlayer) event.getEntity());
         }
+    }
+    @SubscribeEvent
+    public void kill(LivingDeathEvent event) {
+        if (event.getSource().getEntity() instanceof Player player) {
+            player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+                List<ClaimedQuest> quest = cap.getQuests();
+                int size = quest.size();
+                for(int i = 0; i < size; i++){
+                    Quest q = Quests.handle_quest_id(quest.get(i).id);
+                    if(q.type == QuestType.KILL){
+
+                        int ss = q.kills.mobs.length;
+                        for(int k = 0; k < ss; k++){
+                            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(q.kills.mobs[k]));
+                            if(event.getEntity().getType().equals(type)){
+                                if(quest.get(i).kills.length == 0){
+                                    quest.get(i).kills = new int[ss];
+                                    quest.get(i).kills[k] = 0;
+
+                                }
+                                quest.get(i).kills[k]++;
+                                LOGGER.info("killed entity");
+                                syncCapability(cap, (ServerPlayer) player);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    public void syncCapability(PlayerClaimedTasks cap, ServerPlayer player){
+        CompoundTag c = new CompoundTag(); //// Capability syncing
+        cap.saveNBTData(c);
+        PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), player);
     }
 
     @Mod.EventBusSubscriber(modid = MODID)
@@ -102,6 +147,7 @@ public class CustomNpcs
                 PacketHandler.sendToPlayer(new PlayerClaimTaskClient(c), (ServerPlayer) event.getEntity());
             });
         }
+
         @SubscribeEvent
         public static void onPlayerCloned(PlayerEvent.Clone event){
             if(event.isWasDeath()){

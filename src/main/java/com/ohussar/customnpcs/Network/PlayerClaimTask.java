@@ -29,7 +29,7 @@ public class PlayerClaimTask {
 
         context.get().enqueueWork(() ->{
                 context.get().getSender().getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
-                    cap.addQuest(a.id, a.npc);
+                    cap.addQuest(a.id, a.npc, new int[]{});
                     CompoundTag nbt = new CompoundTag();
                     cap.saveNBTData(nbt);
                     PacketHandler.sendToPlayer(new PlayerClaimTaskClient(nbt), context.get().getSender());

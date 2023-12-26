@@ -9,6 +9,8 @@ public class QuestRawJson {
     public List<QuestInput> input;
     public List<QuestInput> rewards;
 
+    public List<QuestKillsRaw> kills;
+
     public class Data{
         public List<QuestRawJson> quests;
     }

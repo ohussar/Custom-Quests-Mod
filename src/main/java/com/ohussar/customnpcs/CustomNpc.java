@@ -27,7 +27,7 @@ import net.minecraftforge.network.NetworkHooks;
 
 public class CustomNpc extends AgeableMob implements MenuProvider {
 
-    private int questAmount = 3;
+    public int questAmount = 3;
     public Quest[] quests = new Quest[questAmount];
     public int frame = 0;
 
@@ -77,18 +77,19 @@ public class CustomNpc extends AgeableMob implements MenuProvider {
         if(!player.level().isClientSide()){
             if(player instanceof ServerPlayer s){
                 if(!s.level().isClientSide){
-                    for(int i = 0; i < questAmount; i++){
-                        quests[i] = Quests.getRandomQuest();
-                    } 
-                    PacketHandler.sendToAllClients(new SyncQuestData(quests, this.getId()));
-                    CustomNpcs.LOGGER.info(quests[0].rewardItems.item[0].toString());
+                    setNewQuests();
                     NetworkHooks.openScreen(s, this, buf -> buf.writeInt(this.getId()));
                 }
             }
         }
         return super.mobInteract(player, p_21421_);
     }
-
+    public void setNewQuests(){
+        for(int i = 0; i < questAmount; i++){
+            quests[i] = Quests.getRandomQuest();
+        } 
+        PacketHandler.sendToAllClients(new SyncQuestData(quests, this.getId()));
+    }
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);

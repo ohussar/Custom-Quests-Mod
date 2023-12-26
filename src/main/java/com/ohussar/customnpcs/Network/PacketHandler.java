@@ -38,6 +38,16 @@ public class PacketHandler {
         .decoder(PlayerClaimTaskClient::new)
         .consumerMainThread(PlayerClaimTaskClient::handle)
         .add();
+        INSTANCE.messageBuilder(SyncInventory.class, id++)
+        .encoder(SyncInventory::encode)
+        .decoder(SyncInventory::new)
+        .consumerMainThread(SyncInventory::handle)
+        .add();
+        INSTANCE.messageBuilder(FinishQuest.class, id++)
+        .encoder(FinishQuest::encode)
+        .decoder(FinishQuest::new)
+        .consumerMainThread(FinishQuest::handle)
+        .add();
     }
 
     public static void sendToServer(Object msg){

@@ -28,7 +28,7 @@ public class PlayerClaimedTasksProvider implements ICapabilityProvider, INBTSeri
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        createPlayerClaimed().loadNBTData(nbt);
+        createPlayerClaimed().loadNBTData(nbt, false);
     }
 
     @Override

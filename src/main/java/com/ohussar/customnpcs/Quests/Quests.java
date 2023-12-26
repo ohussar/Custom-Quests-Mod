@@ -27,7 +27,10 @@ public class Quests {
 
     public static Quest getRandomQuest(){
         Random random = new Random();
-        return quests.get(random.nextInt(quests.size()));
+        if(quests.size() > 0){
+            return quests.get(random.nextInt(quests.size()));
+        }
+        return null;
     }
 
     public static void loadQuest(QuestRawJson q){
@@ -47,12 +50,28 @@ public class Quests {
             rewardCount[i] = q.rewards.get(i).count;
         }
 
+        
+
+        int size3 = q.kills.size();
+
+        String[] mobs = new String[size3];
+        int[] kills = new int[size3];
+
+        for(int i = 0; i < size3; i++){
+            mobs[i] = q.kills.get(i).mob;
+            kills[i] = q.kills.get(i).kill;
+        }
+
         quests.add(new Quest(q.type, 
             new QuestItem(rewardItem, rewardCount),
             new QuestItem(inputItem, inputCount), 
+            new QuestKills(mobs, kills),
             q.id
             ));
+
+
         CustomNpcs.LOGGER.info("Registered Quest ID: " + Integer.toString(q.id));    
     }
 
+ 
 }
