@@ -4,18 +4,20 @@ import com.ohussar.customnpcs.CustomNpcs;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.NetworkRegistry.ChannelBuilder;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class PacketHandler {
     private static int id = 0;
-    private static final SimpleChannel INSTANCE = ChannelBuilder.named(
-        new ResourceLocation(CustomNpcs.MODID, "main"))
-        .serverAcceptedVersions(version -> true)
-        .clientAcceptedVersions(version -> true)
-        .networkProtocolVersion(() -> "1")
-        .simpleChannel();
+    private static final String PROTOCOL_VERSION = "1.1";
+    private static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation(CustomNpcs.MODID, "main"),
+        () -> PROTOCOL_VERSION,
+        PROTOCOL_VERSION::equals,
+        PROTOCOL_VERSION::equals
+    );
+
 
     public static void register(){
         INSTANCE.messageBuilder(SyncQuests.class, id++)
