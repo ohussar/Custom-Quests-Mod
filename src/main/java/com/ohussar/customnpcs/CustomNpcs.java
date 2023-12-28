@@ -2,12 +2,14 @@ package com.ohussar.customnpcs;
 
 import com.mojang.logging.LogUtils;
 import com.ohussar.customnpcs.CustomNpcs.ServerModEvents;
+import com.ohussar.customnpcs.KeyBindings.Keybindings;
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.PlayerClaimTaskClient;
 import com.ohussar.customnpcs.Network.SyncQuests;
 import com.ohussar.customnpcs.PlayerClaimedTasks.ClaimedQuest;
 import com.ohussar.customnpcs.PlayerClaimedTasks.PlayerClaimedTasks;
 import com.ohussar.customnpcs.PlayerClaimedTasks.PlayerClaimedTasksProvider;
+import com.ohussar.customnpcs.QuestScreen.QuestScreen;
 import com.ohussar.customnpcs.Quests.Quest;
 import com.ohussar.customnpcs.Quests.QuestType;
 import com.ohussar.customnpcs.Quests.Quests;
@@ -24,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.ticks.TickPriority;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -62,17 +65,12 @@ public class CustomNpcs
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
         EntityInit.ENTITIES.register(modEventBus);
         MenuInit.MENU_TYPES.register(modEventBus);
-        // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new ServerModEvents());
-        // Register the item to a creative tab
         Config.loadConfig();
-        // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        //ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -83,7 +81,6 @@ public class CustomNpcs
     }
 
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
@@ -120,7 +117,6 @@ public class CustomNpcs
 
                                 }
                                 quest.get(i).kills[k]++;
-                                LOGGER.info("killed entity");
                                 syncCapability(cap, (ServerPlayer) player);
                             }
                         }
@@ -200,7 +196,6 @@ public class CustomNpcs
         }
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents
     {
@@ -228,8 +223,22 @@ public class CustomNpcs
         public static void entityAttributes(EntityAttributeCreationEvent event){
             event.put(EntityInit.CustomNpc.get(), CustomNpc.getCustomNpcAttributes().build());
         }
-
+        @SubscribeEvent
+        public static void registerKeys(RegisterKeyMappingsEvent event){
+            event.register(Keybindings.INSTANCE.exampleKey);
+        }
     }
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+    public class ClientForgeHandler{
+        @SubscribeEvent
+        public static void clientTick(TickEvent.ClientTickEvent event){
+            if(Keybindings.INSTANCE.exampleKey.isDown()){
+                Keybindings.INSTANCE.exampleKey.consumeClick();
+                Minecraft.getInstance().setScreen(new QuestScreen(null));
+            }
+        }
+    }
+
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.DEDICATED_SERVER)
     public class ServerModEvents{
         @SubscribeEvent

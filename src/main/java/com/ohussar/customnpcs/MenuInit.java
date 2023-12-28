@@ -11,5 +11,5 @@ public class MenuInit {
     
     public static final RegistryObject<MenuType<CustomNpcMenu>> NPC_MENU = MENU_TYPES.register("npc_menu", 
     ()-> IForgeMenuType.create(CustomNpcMenu::new));
- 
+
 }

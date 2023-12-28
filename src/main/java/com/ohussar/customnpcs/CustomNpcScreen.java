@@ -267,10 +267,8 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
             int size = quest.kills.mobs.length;
             for(int i = 0; i < size; i++){
 
-                EntityType<?> mob = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation( quest.kills.mobs[i] ) );
-                Entity en = mob.create(this.menu.player.level());
-                String displayName = en.getDisplayName().getString();
-                en.kill();
+
+                String displayName = CachedEntityNames.getKey(quest.kills.mobs[i]);
                 String needed = Integer.toString(quest.kills.kills[i]);
                 mobDisplayName = "Mate "+displayName;
                 if(claimed){
