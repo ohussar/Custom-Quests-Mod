@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.ohussar.customnpcs.PlayerClaimedTasks.PlayerClaimedTasksProvider;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -30,6 +31,9 @@ public class FinishQuest {
                 if(cap.getTimer() <= 0){
                     cap.setDelay();
                 }
+                CompoundTag nbt = new CompoundTag();
+                cap.saveNBTData(nbt);
+                PacketHandler.sendToPlayer(new PlayerClaimTaskClient(nbt), player);
             });
         });
     }

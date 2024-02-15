@@ -3,8 +3,6 @@ package com.ohussar.customnpcs.Network;
 import java.util.function.Supplier;
 
 import com.ohussar.customnpcs.CustomNpcs;
-import com.ohussar.customnpcs.Quests.Quest;
-import com.ohussar.customnpcs.Quests.Quests;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;

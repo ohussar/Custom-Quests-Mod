@@ -1,7 +1,6 @@
 package com.ohussar.customnpcs;
 
 import com.mojang.logging.LogUtils;
-import com.ohussar.customnpcs.CustomNpcs.ServerModEvents;
 import com.ohussar.customnpcs.KeyBindings.Keybindings;
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.PlayerClaimTaskClient;
@@ -21,14 +20,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.ticks.TickPriority;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
@@ -45,9 +41,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
-import oshi.hardware.CentralProcessor.TickType;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
@@ -61,6 +59,9 @@ public class CustomNpcs
     public static final int QUEST_DELAY = 6000;
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static Map<UUID, Integer> timerToSync = new HashMap<UUID, Integer>();
+
     public CustomNpcs()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -184,6 +185,18 @@ public class CustomNpcs
                             cap.subTimer();
                             if(cap.getTimer()%5 == 0){
                                 sync(cap, (ServerPlayer) event.player);
+                            }
+                        }else{
+                            if(!timerToSync.containsKey(event.player.getUUID())){
+                                timerToSync.put(event.player.getUUID(), 5);
+                            }else{
+                                int time = timerToSync.get(event.player.getUUID());
+                                time--;
+                                timerToSync.put(event.player.getUUID(), time);
+                                if(time <= 0){
+                                    timerToSync.put(event.player.getUUID(), 5);
+                                    sync(cap, (ServerPlayer) event.player);
+                                }
                             }
                         }
                     }else{

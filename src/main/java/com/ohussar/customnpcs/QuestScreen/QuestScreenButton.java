@@ -1,7 +1,6 @@
 package com.ohussar.customnpcs.QuestScreen;
 
 import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;

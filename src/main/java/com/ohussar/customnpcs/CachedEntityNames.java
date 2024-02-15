@@ -19,7 +19,8 @@ public class CachedEntityNames {
 
     private static void hashName(String name){
         EntityType<?> mob = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(name) );
-        Entity en = mob.create(Minecraft.getInstance().player.level());
+        Minecraft mine = Minecraft.getInstance();
+        Entity en = mob.create(mine.player.level());
         names.put(name, en.getDisplayName().getString());
         en.kill();
     }

@@ -1,5 +1,4 @@
 package com.ohussar.customnpcs;
-import java.lang.reflect.InvocationTargetException;
 
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.PlayerClaimTask;
@@ -16,12 +15,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.registries.ForgeRegistries;
 
 
 public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
@@ -78,6 +74,8 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
     private int iteration;
     private int delay = 0;
 
+    private Quest placeholder;
+
     public CustomNpcScreen(CustomNpcMenu menu, Inventory inv, Component ptitle) {
         super(menu, inv, ptitle);
         this.inventoryLabelY += 21;
@@ -96,7 +94,8 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
         if(menu.getQuest(questSelected) != null){
             canDraw = true;
             quest = menu.getQuest(questSelected);
-            Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
+            Minecraft mine = Minecraft.getInstance();
+            mine.player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
                 int size = cap.getQuests().size();
                 delay = cap.getTimer();
                 for(int k = 0; k < size; k++){
@@ -274,7 +273,8 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
                 if(claimed){
                     mobDisplayName += " ";
                     iteration = i;
-                    Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
+                    Minecraft mine = Minecraft.getInstance();
+                    mine.player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap -> {
                         int s = cap.getQuests().size();
                         for(int k = 0; k < s; k++){
                             if(cap.getQuests().get(k).npc.equals(this.menu.npc.getUUID())){
@@ -318,9 +318,9 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
         if(questButton == null){
             questButton = Button.builder(null, (btn) -> {
                 if(this.canDraw){
-                    PacketHandler.sendToServer(new PlayerClaimTask(menu.npc.getUUID(), this.menu.getQuest(this.questSelected).id));
+                    this.buttonCallbackOne();
                 }else{
-                    QuestComplete.handleTaskComplete(quest, this.menu.npc.getUUID());
+                    this.buttonCallbackTwo();
                 }
             }).size(buttonW, buttonH).pos(xx, yy).build();
             this.addWidget(questButton);
@@ -330,6 +330,24 @@ public class CustomNpcScreen extends AbstractContainerScreen<CustomNpcMenu> {
         render.blit(TEXTURE, xx, yy, buttonX, buttonYY, buttonW, buttonH);
         render.drawCenteredString(font, Component.literal(buttonText), xx + buttonW / 2, 
             yy + 3, 0xffffff);
+    }
+
+    public void buttonCallbackOne(){
+        PacketHandler.sendToServer(new PlayerClaimTask(this.menu.npc.getUUID(), this.menu.getQuest(this.questSelected).id));
+    }
+    public void buttonCallbackTwo(){
+
+
+        Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+            int s = cap.getQuests().size();
+            for(int i = 0; i < s; i++){
+                if(cap.getQuests().get(i).npc.equals(this.menu.npc.getUUID())){
+                    placeholder = Quests.handle_quest_id(cap.getQuests().get(i).id);
+                }
+            }
+        });
+
+        QuestComplete.handleTaskComplete(placeholder, this.menu.npc.getUUID());
     }
 
     @Override

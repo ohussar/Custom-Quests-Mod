@@ -10,7 +10,6 @@ import com.ohussar.customnpcs.Quests.Quests;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -32,11 +31,9 @@ public class QuestScreen extends Screen {
     private int buttonYS = buttonY + 15;
     private int buttonYB = buttonYS + 15;
 
-    private QuestScreenButton[] buttons = new QuestScreenButton[5];
+    private QuestScreenButton[] buttons = new QuestScreenButton[9];
     private List<ClaimedQuest> quests;
     private int buttonSelected = -1;
-    private Quest selected;
-    private int iteration = -1;
 
     private int leftPos = 0;
     private int topPos = 0;
@@ -63,7 +60,7 @@ public class QuestScreen extends Screen {
     public void renderButtons(GuiGraphics render, int mouseX, int mouseY){
         int baseY = 9;
         int xx = 8;
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < 9; i++){
             int yy = baseY + i * 16;
             if(buttons[i] == null){
                 buttons[i] = QuestScreenButton.builder(null, (btn) -> {
@@ -77,7 +74,8 @@ public class QuestScreen extends Screen {
                 by = buttonYS;
             }
             quests = null;
-            Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
+            Minecraft mine = Minecraft.getInstance();
+            mine.player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
                 quests = cap.getQuests();
             });
             int size = quests.size();
@@ -89,7 +87,7 @@ public class QuestScreen extends Screen {
                     q[k] = Quests.handle_quest_id(quests.get(k).id);
                     q[k].killed = quests.get(k).kills;
                 }
-                if(q.length > 5){
+                if(q.length > 9){
 
                 }else{
                     if(i > q.length - 1){
@@ -126,7 +124,6 @@ public class QuestScreen extends Screen {
         int textY = topPos  + 10;
         graphics.drawString(font, Component.literal("Quest id: " + Integer.toString(quest.id)), textX, textY, 0xffffff);
         int rewardsBaseY = 78;
-        int rewardsBaseSum = 0;
 
         graphics.drawCenteredString(font, Component.literal("Requisitos:"), leftPos + 166,topPos + 26, 0xffffff);
 
@@ -190,7 +187,6 @@ public class QuestScreen extends Screen {
                     int count = quest.killed.length > 0 ? quest.killed[i] : 0;
                     int n =  quest.kills.kills[i];
                     int yy = 42 + topPos;
-                    int xx = 97 + leftPos;
 
                     String toDraw = "Mate " + name + " " + Integer.toString(count) + "/" + Integer.toString(n);
  

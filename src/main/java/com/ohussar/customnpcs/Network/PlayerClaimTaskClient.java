@@ -1,6 +1,5 @@
 package com.ohussar.customnpcs.Network;
 
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import net.minecraft.nbt.CompoundTag;

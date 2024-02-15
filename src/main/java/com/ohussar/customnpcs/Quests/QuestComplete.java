@@ -1,7 +1,7 @@
 package com.ohussar.customnpcs.Quests;
 import java.util.UUID;
 import java.util.List;
-import com.ohussar.customnpcs.CustomNpcs;
+
 import com.ohussar.customnpcs.Network.FinishQuest;
 import com.ohussar.customnpcs.Network.PacketHandler;
 import com.ohussar.customnpcs.Network.SyncInventory;
@@ -44,7 +44,6 @@ public class QuestComplete {
                             if(q.get(k).kills[j] >= quest.kills.kills[j]){
 
                             }else{
-                                CustomNpcs.LOGGER.info("nossa");
                                 thisCompleted = false;
                             }
                         }else{
@@ -61,7 +60,7 @@ public class QuestComplete {
             QuestItem reward = quest.rewardItems;
 
             for(int i = 0; i < reward.item.length; i++){
-                Inventory inv = Minecraft.getInstance().player.getInventory();
+                Inventory inv = mine.player.getInventory();
                 int free = inv.getFreeSlot();  
                 ItemStack item = new ItemStack(reward.item[i]);
                 item.setCount(reward.quantity[i]); 
@@ -80,7 +79,8 @@ public class QuestComplete {
         int size = input.item.length;
         Boolean hasAllItemsNeeded = true;
         for(int i = 0; i < size; i++){
-            Inventory inv = Minecraft.getInstance().player.getInventory();
+            Minecraft mine = Minecraft.getInstance();
+            Inventory inv = mine.player.getInventory();
             int count = 0;
             Item itemToCheck = input.item[i];
             for(int j = 0;  j < inv.getContainerSize(); j++){
@@ -100,7 +100,8 @@ public class QuestComplete {
             List<Integer> slotsChanged = new ArrayList<Integer>();
             List<ItemStack> newStacks = new ArrayList<ItemStack>();
             for(int i = 0; i < size; i++){
-                Inventory inv = Minecraft.getInstance().player.getInventory();
+                Minecraft mine = Minecraft.getInstance();
+                Inventory inv = mine.player.getInventory();
                 Item itemToCheck = input.item[i];
                 for(int j = 0;  j < inv.getContainerSize(); j++){
                     if(inv.getItem(j).getItem().equals(itemToCheck)){
@@ -120,7 +121,8 @@ public class QuestComplete {
                 }
             }
             for(int i = 0; i < reward.item.length; i++){
-                Inventory inv = Minecraft.getInstance().player.getInventory();
+                Minecraft mine = Minecraft.getInstance();
+                Inventory inv = mine.player.getInventory();
                 int free = inv.getFreeSlot();  
                 ItemStack item = new ItemStack(reward.item[i]);
                 item.setCount(reward.quantity[i]); 
@@ -136,12 +138,7 @@ public class QuestComplete {
     public static void Finish(List<Integer> slots, List<ItemStack> stacks, UUID uuid){
         PacketHandler.sendToServer(new SyncInventory(stacks, slots));
         PacketHandler.sendToServer(new FinishQuest(uuid));
-        Minecraft.getInstance().player.getCapability(PlayerClaimedTasksProvider.CLAIMED_TASKS).ifPresent(cap ->{
-            cap.removeQuest(uuid);
-            if(cap.getTimer() <= 0){
-                cap.setDelay();
-            }
-        });
-        Minecraft.getInstance().player.closeContainer();
+        Minecraft mine = Minecraft.getInstance();
+        mine.player.closeContainer();
     }
 }
